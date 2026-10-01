@@ -129,17 +129,32 @@ class AplicacionAutomatas:
         self.tree_estados.pack(fill='both', expand=True)
 
     def _crear_automata(self):
-        try:
-            nombre = self.entry_nombre.get() or "Automata"
-            es_afn = self.var_tipo.get() == "NFA"
-            self.automata_actual = AutomataFinito(nombre, es_afn)
-            self.automata_actual.establecer_alfabeto(self.entry_alfabeto.get())
+    try:
+        nombre = self.entry_nombre.get().strip()
+        if not nombre:
+            raise ValueError("El nombre del autómata no puede estar vacío")
 
-            self._refrescar_lista()
-            self.log(f"✓ Autómata '{nombre}' creado ({'NFA' if es_afn else 'DFA'})")
-            self.log(f"  Alfabeto: {{{', '.join(sorted(self.automata_actual.alfabeto))}}}")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+        tipo_seleccionado = self.var_tipo.get()
+        es_afn = (tipo_seleccionado == "AFN")
+
+        texto_alfabeto = self.entry_alfabeto.get().strip()
+        if not texto_alfabeto:
+            raise ValueError("Debe especificar al menos un símbolo para el alfabeto.")
+
+        simbolos = [s.strip() for s in texto_alfabeto.split(',') if s.strip()]
+        for s in simbolos:
+            if len(s) != 1:
+                raise ValueError(f"El símbolo '{s}' no es válido.")
+        if len(simbolos) != len(set(simbolos)):
+            raise ValueError("El alfabeto contiene símbolos duplicados")
+
+        self.automata_actual = AutomataFinito(nombre, es_afn)
+        self.automata_actual.establecer_alfabeto(simbolos)
+        self._refrescar_lista()
+        self.log(f"✓ Autómata '{nombre}' creado")
+    except ValueError as e:
+        messagebox.showerror("Configuración inválida", str(e))
+        self.log(f"✗ {e}")
 
     def _agregar_estado(self):
         try:
