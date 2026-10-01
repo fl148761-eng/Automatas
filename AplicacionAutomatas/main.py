@@ -156,17 +156,19 @@ class AplicacionAutomatas:
         messagebox.showerror("Configuración inválida", str(e))
         self.log(f"✗ {e}")
 
-    def _agregar_estado(self):
-        try:
-            sid = self.entry_estado_id.get().strip()
-            if not sid:
-                raise ValueError("Ingrese un ID")
-            self.automata_actual.agregar_estado(sid)
-            self.entry_estado_id.delete(0, 'end')
-            self._refrescar_lista()
-            self.log(f"✓ Estado '{sid}' agregado")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+   def _agregar_estado(self):
+    try:
+        sid = self.entry_estado_id.get().strip()
+        if not sid:
+            raise ValueError("Debe ingresar un ID para el estado")
+        if any(c in sid for c in ' ,;{}()[]'):
+            raise ValueError(f"El ID '{sid}' contiene caracteres no permitidos.")
+        self.automata_actual.agregar_estado(sid)
+        self.entry_estado_id.delete(0, 'end')
+        self._refrescar_lista()
+        self.log(f"✓ Estado '{sid}' agregado")
+    except ValueError as e:
+        messagebox.showerror("Estado no válido", str(e))
 
     def _eliminar_estado(self):
         sel = self.tree_estados.selection()
