@@ -202,20 +202,35 @@ class AplicacionAutomatas:
         self.log(f"✓ Estado '{sid}' {'marcado' if estado.es_final else 'desmarcado'} como final")
 
     def _agregar_transicion(self):
-        try:
-            desde = self.entry_desde.get().strip()
-            simbolo = self.entry_simbolo.get().strip()
-            hacia = self.entry_hacia.get().strip()
-            if not (desde and simbolo and hacia):
-                raise ValueError("Complete todos los campos")
-            self.automata_actual.agregar_transicion(desde, simbolo, hacia)
-            self.entry_desde.delete(0, 'end')
-            self.entry_simbolo.delete(0, 'end')
-            self.entry_hacia.delete(0, 'end')
-            self._refrescar_lista()
-            self.log(f"✓ Transición: {desde} --{simbolo}--> {hacia}")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+    try:
+        desde = self.entry_desde.get().strip()
+        simbolo = self.entry_simbolo.get().strip()
+        hacia = self.entry_hacia.get().strip()
+
+        if not (desde and simbolo and hacia):
+            raise ValueError("Complete todos los campos")
+
+        if not self.automata_actual.obtener_estado(desde):
+            raise ValueError(f"El estado origen '{desde}' no existe")
+        if not self.automata_actual.obtener_estado(hacia):
+            raise ValueError(f"El estado destino '{hacia}' no existe")
+
+        if simbolo not in ('ε', 'epsilon', ''):
+            if len(simbolo) > 1:
+                raise ValueError("El símbolo debe ser un único carácter")
+            if self.automata_actual.alfabeto and simbolo not in self.automata_actual.alfabeto:
+                raise ValueError(f"El símbolo '{simbolo}' no pertenece al alfabeto")
+
+        self.automata_actual.agregar_transicion(desde, simbolo, hacia)
+
+        self.entry_desde.delete(0, 'end')
+        self.entry_simbolo.delete(0, 'end')
+        self.entry_hacia.delete(0, 'end')
+
+        self._refrescar_lista()
+        self.log(f"✓ Transición: {desde} --{simbolo}--> {hacia}")
+    except ValueError as e:
+        messagebox.showerror("Transición inválida", str(e))
 
     def _refrescar_lista(self):
         for item in self.tree_estados.get_children():
