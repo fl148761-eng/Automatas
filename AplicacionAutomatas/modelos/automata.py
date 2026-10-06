@@ -74,28 +74,30 @@ class AutomataFinito:
             self.alfabeto = set(simbolos)
 
     # ---------- TRANSICIONES ----------
-    def agregar_transicion(self, desde_id, simbolo, hacia_id):
-        desde = self.obtener_estado(desde_id)
-        hacia = self.obtener_estado(hacia_id)
-        if not desde or not hacia:
-            raise ValueError("Estados origen o destino no encontrados")
+  def agregar_transicion(self, desde_id, simbolo, hacia_id):
+    desde = self.obtener_estado(desde_id)
+    hacia = self.obtener_estado(hacia_id)
+    if not desde or not hacia:
+        raise ValueError("Estados origen o destino no encontrados")
 
-        if simbolo in ('ε', 'epsilon', ''):
-            if not self.es_afn:
-                raise ValueError("Un DFA no puede tener transiciones épsilon")
-            desde.agregar_transicion_epsilon(hacia)
-        else:
-            # Validar DFA: solo una transición por símbolo
-            if not self.es_afn:
-                existentes = desde.obtener_transiciones(simbolo)
-                if existentes and existentes[0] != hacia:
-                    raise ValueError(
-                        f"DFA inválido: '{desde.id}' ya tiene transición con '{simbolo}' "
-                        f"hacia '{existentes[0].id}'. Un DFA solo permite una."
-                    )
+    if simbolo in ('ε', 'epsilon', ''):
+        if not self.es_afn:
+            raise ValueError("Un DFA no puede tener transiciones épsilon")
+        desde.agregar_transicion_epsilon(hacia)
+    else:
+        if self.alfabeto and simbolo not in self.alfabeto:
+            alfabeto_ordenado = ', '.join(sorted(self.alfabeto))
+            raise ValueError(f"El símbolo '{simbolo}' no pertenece al alfabeto "
+                             f"{{{alfabeto_ordenado}}}")
 
-            desde.agregar_transicion(simbolo, hacia)
-            self.alfabeto.add(simbolo)
+        if not self.es_afn:
+            existentes = desde.obtener_transiciones(simbolo)
+            if existentes and existentes[0] != hacia:
+                raise ValueError(f"DFA inválido: '{desde.id}' ya tiene transición "
+                                 f"con '{simbolo}' hacia '{existentes[0].id}'")
+
+        desde.agregar_transicion(simbolo, hacia)
+        self.alfabeto.add(simbolo)
 
     # ---------- CIERRE EPSILON ----------
     def cierre_epsilon(self, estados):
