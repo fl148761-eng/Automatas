@@ -328,15 +328,37 @@ class AplicacionAutomatas:
                    command=self._mostrar_actual).pack(pady=5)
 
     def _convertir_afn_afd(self):
-        try:
-            if not self.automata_actual.es_afn:
-                messagebox.showinfo("Info", "El autómata ya es un AFD")
-                return
-            self.automata_actual = self.automata_actual.afn_a_afd()
-            self._refrescar_lista()
-            self.log(f"✓ Conversión AFN → AFD completada ({len(self.automata_actual.estados)} estados)")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
+           try:
+               if not self.automata_actual.estados:         
+                messagebox.showwarning("Aviso", "No hay autómata creado")
+                   return
+                   if not self.automata_actual.es_afn:
+                       mensaje = (f"El autómata '{self.automata_actual.nombre}' ya es un AFD.\n\n"
+                            f"No es necesaria la conversión AFN → AFD.")
+                       messagebox.showinfo("Sin conversión necesaria", mensaje)
+                       self.log("ℹ El autómata ya es AFD. No se requiere conversión.")
+                       return
+                       
+                    self.log("--- Iniciando conversión AFN → AFD ---")
+                   estados_antes = len(self.automata_actual.estados)
+                   
+                   self.automata_actual = self.automata_actual.afn_a_afd()
+                   estados_despues = len(self.automata_actual.estados)          
+                   
+                   self.fue_convertido = True
+                   self._refrescar_lista()          
+                   
+                   self.log(f"✓ Conversión completada")
+                   self.log(f"  Estados antes: {estados_antes}")         
+                   self.log(f"  Estados después: {estados_despues}")          
+                   
+                   messagebox.showinfo("Conversión exitosa",            
+                                       f"✓ AFN convertido a AFD\n\n"
+                                       f"Estados antes: {estados_antes}\n"
+                                       f"Estados después: {estados_despues}")
+           except Exception as e:
+               messagebox.showerror("Error en conversión", str(e))
+               self.log(f"✗ Error: {e}") 
 
     def _minimizar(self):
         try:
