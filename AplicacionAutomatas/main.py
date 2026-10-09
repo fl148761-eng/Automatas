@@ -361,21 +361,61 @@ class AplicacionAutomatas:
                self.log(f"✗ Error: {e}") 
 
     def _minimizar(self):
-        try:
-            if self.automata_actual.es_afn:
-                messagebox.showinfo("Info", "Primero convierta el AFN a AFD")
-                return
-            self.automata_actual = self.automata_actual.minimizar()
-            self._refrescar_lista()
-            self.log(f"AFD minimizado ({len(self.automata_actual.estados)} estados)")
-        except Exception as e:
-            messagebox.showerror("Error", str(e))
-
-    def _mostrar_actual(self):
-        texto = self.automata_actual.a_texto()
-        for linea in texto.split('\n'):
-            self.log(linea)
-
+        
+def _minimizar(self): 
+    try: 
+        if not self.automata_actual.estados: 
+            messagebox.showwarning("Aviso", "No hay autómata creado") 
+            return 
+ 
+        if self.automata_actual.es_afn: 
+            mensaje = (f"El autómata '{self.automata_actual.nombre}' es un AFN.\n\n" 
+                       f"Primero debe convertirlo a AFD antes de minimizar.") 
+            messagebox.showinfo("No se puede minimizar", mensaje) 
+            self.log("ℹ No se puede minimizar un AFN. Conviértalo primero a AFD.") 
+            return 
+ 
+        estados_antes = len(self.automata_actual.estados) 
+ 
+        if estados_antes <= 1: 
+            messagebox.showinfo("No se puede minimizar", 
+                "El autómata tiene 1 o menos estados.\nNo hay nada que minimizar.") 
+            self.log("ℹ Este autómata no se puede minimizar (≤1 estado)") 
+            return 
+ 
+        self.log("--- Iniciando minimización ---") 
+        self.log(f"Estados originales: {estados_antes}") 
+ 
+        automata_min = self.automata_actual.minimizar() 
+        estados_despues = len(automata_min.estados) 
+ 
+        if estados_despues == estados_antes: 
+            self.log("ℹ El autómata ya estaba en su forma mínima") 
+            messagebox.showinfo("Autómata ya mínimo", 
+                f"El autómata ya estaba en su forma mínima.\n\n" 
+                f"Estados: {estados_antes} → {estados_despues}\n" 
+                f"Al aplicar la minimización vuelve a quedar con los mismos estados.") 
+            self.fue_minimizado = True 
+            return 
+ 
+        self.automata_actual = automata_min 
+        self.fue_minimizado = True 
+        self._refrescar_lista() 
+ 
+        self.log(f"✓ Minimización completada") 
+        self.log(f"  Estados antes: {estados_antes}") 
+        self.log(f"  Estados después: {estados_despues}") 
+        self.log(f"  Reducción: {estados_antes - estados_despues} estado(s)") 
+ 
+        messagebox.showinfo("Minimización exitosa", 
+            f"✓ AFD minimizado\n\n" 
+            f"Estados antes: {estados_antes}\n" 
+            f"Estados después: {estados_despues}\n" 
+            f"Reducción: {estados_antes - estados_despues} estado(s)") 
+    except Exception as e: 
+        messagebox.showerror("Error en minimización", str(e)) 
+        self.log(f"✗ Error: {e}")
+        
     # ==================== PESTAÑA: REGEX ====================
     def _construir_tab_regex(self):
         frame = self.tab_regex
