@@ -416,6 +416,56 @@ def _minimizar(self):
         messagebox.showerror("Error en minimización", str(e)) 
         self.log(f"✗ Error: {e}")
         
+        def _mostrar_actual(self):
+        a = self.automata_actual
+
+        if not a.estados:
+            messagebox.showwarning("Aviso", "No hay autómata cargado")
+            return
+
+        tipo = "AFN" if a.es_afn else "AFD"
+        alfabeto = ", ".join(sorted(a.alfabeto))
+        inicial = a.estado_inicial.id if a.estado_inicial else "(ninguno)"
+        finales = ", ".join(e.id for e in a.estados if e.es_final)
+
+        self.log("=" * 60)
+        self.log("ESTADO ACTUAL DEL AUTÓMATA")
+        self.log(f"Nombre: {a.nombre}")
+        self.log(f"Tipo: {tipo}")
+        self.log(f"Alfabeto: {{{alfabeto}}}")
+        self.log(f"Número de estados: {len(a.estados)}")
+        self.log(f"Estado inicial: {inicial}")
+        self.log(f"Estados finales: {{{finales}}}")
+        self.log("── Transiciones ──")
+
+        hay_transiciones = False
+        for estado in a.estados:
+            for simbolo, destinos in sorted(estado.transiciones.items()):
+                for destino in destinos:
+                    self.log(f"({estado.id}, {simbolo}) → {destino.id}")
+                    hay_transiciones = True
+
+            for destino in estado.transiciones_epsilon:
+                self.log(f"({estado.id}, ε) → {destino.id}")
+                hay_transiciones = True
+
+        if not hay_transiciones:
+            self.log("(no hay transiciones)")
+
+        self.log("=" * 60)
+
+        resumen = (
+            f"Autómata: {a.nombre}\n"
+            f"Tipo: {tipo}\n"
+            f"Alfabeto: {{{alfabeto}}}\n"
+            f"Estados: {len(a.estados)}\n"
+            f"Inicial: {inicial}\n"
+            f"Finales: {{{finales}}}\n"
+            f"Convertido: {'Sí' if getattr(self, 'fue_convertido', False) else 'No'}\n"
+            f"Minimizado: {'Sí' if getattr(self, 'fue_minimizado', False) else 'No'}"
+        )
+        messagebox.showinfo("Estado Actual del Autómata", resumen)
+    
     # ==================== PESTAÑA: REGEX ====================
     def _construir_tab_regex(self):
         frame = self.tab_regex
