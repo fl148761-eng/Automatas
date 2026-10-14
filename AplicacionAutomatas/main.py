@@ -103,12 +103,21 @@ class AplicacionAutomatas:
         self.entry_simbolo = ttk.Entry(tr_frame, width=8)
         self.entry_simbolo.grid(row=0, column=3, padx=5)
 
+        ttk.Button(tr_frame, text="ε", width=3, command=self._insertar_epsilon).grid(row=0, column=7, padx=2)
+
+
         ttk.Label(tr_frame, text="Hacia:").grid(row=0, column=4, padx=5)
         self.entry_hacia = ttk.Entry(tr_frame, width=10)
         self.entry_hacia.grid(row=0, column=5, padx=5)
 
         ttk.Button(tr_frame, text="Agregar Transición", command=self._agregar_transicion).grid(
             row=0, column=6, padx=10)
+        
+        self.label_modo = ttk.Label(tr_frame, text="Modo: AFD", 
+                             foreground='blue', 
+                             font=('Arial', 9, 'bold')) 
+        self.label_modo.grid(row=2, column=0, columnspan=8, pady=5) 
+        
         ttk.Label(tr_frame, text="(Use 'ε' para transición épsilon)",
                   foreground='gray').grid(row=1, column=0, columnspan=7, pady=5)
 
@@ -127,6 +136,11 @@ class AplicacionAutomatas:
         self.tree_estados.column('final', width=80)
         self.tree_estados.column('trans', width=500)
         self.tree_estados.pack(fill='both', expand=True)
+
+    def _insertar_epsilon(self): 
+        self.entry_simbolo.delete(0, 'end') 
+        self.entry_simbolo.insert(0, 'ε') 
+        self.entry_simbolo.focus() 
 
     def _crear_automata(self):
     try:
@@ -152,6 +166,13 @@ class AplicacionAutomatas:
         self.automata_actual.establecer_alfabeto(simbolos)
         self._refrescar_lista()
         self.log(f"✓ Autómata '{nombre}' creado")
+        
+        if es_afn: 
+            self.label_modo.config(text="Modo: AFN (permite ε y múltiples transiciones)", 
+                           foreground='green') 
+        else: 
+            self.label_modo.config(text="Modo: AFD (una transición por símbolo, sin ε)", 
+                           foreground='blue') 
     except ValueError as e:
         messagebox.showerror("Configuración inválida", str(e))
         self.log(f"✗ {e}")
