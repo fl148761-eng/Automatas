@@ -16,7 +16,6 @@ class AplicacionAutomatas:
         self._construir_interfaz()
 
     def _construir_interfaz(self):
-        # Cuaderno de pestañas
         self.cuaderno = ttk.Notebook(self.root)
         self.cuaderno.pack(fill='both', expand=True, padx=5, pady=5)
 
@@ -26,7 +25,7 @@ class AplicacionAutomatas:
         self.tab_regex = ttk.Frame(self.cuaderno)
 
         self.cuaderno.add(self.tab_crear, text='Crear Autómata')
-        self.cuaderno.add(self.tab_simular, text='▶ Simular')
+        self.cuaderno.add(self.tab_simular, text='Simular')
         self.cuaderno.add(self.tab_conversion, text='Conversión')
         self.cuaderno.add(self.tab_regex, text='Regex')
 
@@ -35,7 +34,6 @@ class AplicacionAutomatas:
         self._construir_tab_conversion()
         self._construir_tab_regex()
 
-        # Panel de logs
         marco_logs = ttk.LabelFrame(self.root, text="Logs", padding=5)
         marco_logs.pack(fill='x', padx=5, pady=5)
 
@@ -52,7 +50,6 @@ class AplicacionAutomatas:
     def _construir_tab_crear(self):
         frame = self.tab_crear
 
-        # --- Configuración ---
         cfg = ttk.LabelFrame(frame, text="Configuración del Autómata", padding=10)
         cfg.pack(fill='x', padx=10, pady=5)
 
@@ -62,7 +59,7 @@ class AplicacionAutomatas:
         self.entry_nombre.grid(row=0, column=1, padx=5)
 
         ttk.Label(cfg, text="Tipo:").grid(row=0, column=2, sticky='w', padx=5)
-        self.var_tipo = tk.StringVar(value="DFA")
+        self.var_tipo = tk.StringVar(value="AFD")
         ttk.Radiobutton(cfg, text="AFD", variable=self.var_tipo, value="AFD").grid(row=0, column=3)
         ttk.Radiobutton(cfg, text="AFN", variable=self.var_tipo, value="AFN").grid(row=0, column=4)
 
@@ -103,23 +100,19 @@ class AplicacionAutomatas:
         self.entry_simbolo = ttk.Entry(tr_frame, width=8)
         self.entry_simbolo.grid(row=0, column=3, padx=5)
 
-        ttk.Button(tr_frame, text="ε", width=3, command=self._insertar_epsilon).grid(row=0, column=7, padx=2)
+        ttk.Button(tr_frame, text="ε", width=3, command=self._insertar_epsilon).grid(row=0, column=4, padx=2)
 
-
-        ttk.Label(tr_frame, text="Hacia:").grid(row=0, column=4, padx=5)
+        ttk.Label(tr_frame, text="Hacia:").grid(row=0, column=5, padx=5)
         self.entry_hacia = ttk.Entry(tr_frame, width=10)
-        self.entry_hacia.grid(row=0, column=5, padx=5)
+        self.entry_hacia.grid(row=0, column=6, padx=5)
 
         ttk.Button(tr_frame, text="Agregar Transición", command=self._agregar_transicion).grid(
-            row=0, column=6, padx=10)
-        
-        self.label_modo = ttk.Label(tr_frame, text="Modo: AFD", 
-                             foreground='blue', 
-                             font=('Arial', 9, 'bold')) 
-        self.label_modo.grid(row=2, column=0, columnspan=8, pady=5) 
-        
-        ttk.Label(tr_frame, text="(Use 'ε' para transición épsilon)",
-                  foreground='gray').grid(row=1, column=0, columnspan=7, pady=5)
+            row=0, column=7, padx=10)
+
+        self.label_modo = ttk.Label(tr_frame, text="Modo: AFD",
+                                    foreground='blue',
+                                    font=('Arial', 9, 'bold'))
+        self.label_modo.grid(row=1, column=0, columnspan=8, pady=5)
 
         # --- Lista de Estados ---
         lst_frame = ttk.LabelFrame(frame, text="Lista de Estados", padding=10)
@@ -137,59 +130,59 @@ class AplicacionAutomatas:
         self.tree_estados.column('trans', width=500)
         self.tree_estados.pack(fill='both', expand=True)
 
-    def _insertar_epsilon(self): 
-        self.entry_simbolo.delete(0, 'end') 
-        self.entry_simbolo.insert(0, 'ε') 
-        self.entry_simbolo.focus() 
+    def _insertar_epsilon(self):
+        self.entry_simbolo.delete(0, 'end')
+        self.entry_simbolo.insert(0, 'ε')
+        self.entry_simbolo.focus()
 
     def _crear_automata(self):
-    try:
-        nombre = self.entry_nombre.get().strip()
-        if not nombre:
-            raise ValueError("El nombre del autómata no puede estar vacío")
+        try:
+            nombre = self.entry_nombre.get().strip()
+            if not nombre:
+                raise ValueError("El nombre del autómata no puede estar vacío")
 
-        tipo_seleccionado = self.var_tipo.get()
-        es_afn = (tipo_seleccionado == "AFN")
+            tipo_seleccionado = self.var_tipo.get()
+            es_afn = (tipo_seleccionado == "AFN")
 
-        texto_alfabeto = self.entry_alfabeto.get().strip()
-        if not texto_alfabeto:
-            raise ValueError("Debe especificar al menos un símbolo para el alfabeto.")
+            texto_alfabeto = self.entry_alfabeto.get().strip()
+            if not texto_alfabeto:
+                raise ValueError("Debe especificar al menos un símbolo para el alfabeto.")
 
-        simbolos = [s.strip() for s in texto_alfabeto.split(',') if s.strip()]
-        for s in simbolos:
-            if len(s) != 1:
-                raise ValueError(f"El símbolo '{s}' no es válido.")
-        if len(simbolos) != len(set(simbolos)):
-            raise ValueError("El alfabeto contiene símbolos duplicados")
+            simbolos = [s.strip() for s in texto_alfabeto.split(',') if s.strip()]
+            for s in simbolos:
+                if len(s) != 1:
+                    raise ValueError(f"El símbolo '{s}' no es válido.")
+            if len(simbolos) != len(set(simbolos)):
+                raise ValueError("El alfabeto contiene símbolos duplicados")
 
-        self.automata_actual = AutomataFinito(nombre, es_afn)
-        self.automata_actual.establecer_alfabeto(simbolos)
-        self._refrescar_lista()
-        self.log(f"✓ Autómata '{nombre}' creado")
-        
-        if es_afn: 
-            self.label_modo.config(text="Modo: AFN (permite ε y múltiples transiciones)", 
-                           foreground='green') 
-        else: 
-            self.label_modo.config(text="Modo: AFD (una transición por símbolo, sin ε)", 
-                           foreground='blue') 
-    except ValueError as e:
-        messagebox.showerror("Configuración inválida", str(e))
-        self.log(f"✗ {e}")
+            self.automata_actual = AutomataFinito(nombre, es_afn)
+            self.automata_actual.establecer_alfabeto(simbolos)
+            self._refrescar_lista()
+            self.log(f"✓ Autómata '{nombre}' creado")
 
-   def _agregar_estado(self):
-    try:
-        sid = self.entry_estado_id.get().strip()
-        if not sid:
-            raise ValueError("Debe ingresar un ID para el estado")
-        if any(c in sid for c in ' ,;{}()[]'):
-            raise ValueError(f"El ID '{sid}' contiene caracteres no permitidos.")
-        self.automata_actual.agregar_estado(sid)
-        self.entry_estado_id.delete(0, 'end')
-        self._refrescar_lista()
-        self.log(f"✓ Estado '{sid}' agregado")
-    except ValueError as e:
-        messagebox.showerror("Estado no válido", str(e))
+            if es_afn:
+                self.label_modo.config(text="Modo: AFN (permite ε y múltiples transiciones)",
+                                       foreground='green')
+            else:
+                self.label_modo.config(text="Modo: AFD (una transición por símbolo, sin ε)",
+                                       foreground='blue')
+        except ValueError as e:
+            messagebox.showerror("Configuración inválida", str(e))
+            self.log(f"✗ {e}")
+
+    def _agregar_estado(self):
+        try:
+            sid = self.entry_estado_id.get().strip()
+            if not sid:
+                raise ValueError("Debe ingresar un ID para el estado")
+            if any(c in sid for c in ' ,;{}()[]'):
+                raise ValueError(f"El ID '{sid}' contiene caracteres no permitidos.")
+            self.automata_actual.agregar_estado(sid)
+            self.entry_estado_id.delete(0, 'end')
+            self._refrescar_lista()
+            self.log(f"✓ Estado '{sid}' agregado")
+        except ValueError as e:
+            messagebox.showerror("Estado no válido", str(e))
 
     def _eliminar_estado(self):
         sel = self.tree_estados.selection()
@@ -223,35 +216,35 @@ class AplicacionAutomatas:
         self.log(f"✓ Estado '{sid}' {'marcado' if estado.es_final else 'desmarcado'} como final")
 
     def _agregar_transicion(self):
-    try:
-        desde = self.entry_desde.get().strip()
-        simbolo = self.entry_simbolo.get().strip()
-        hacia = self.entry_hacia.get().strip()
+        try:
+            desde = self.entry_desde.get().strip()
+            simbolo = self.entry_simbolo.get().strip()
+            hacia = self.entry_hacia.get().strip()
 
-        if not (desde and simbolo and hacia):
-            raise ValueError("Complete todos los campos")
+            if not (desde and simbolo and hacia):
+                raise ValueError("Complete todos los campos")
 
-        if not self.automata_actual.obtener_estado(desde):
-            raise ValueError(f"El estado origen '{desde}' no existe")
-        if not self.automata_actual.obtener_estado(hacia):
-            raise ValueError(f"El estado destino '{hacia}' no existe")
+            if not self.automata_actual.obtener_estado(desde):
+                raise ValueError(f"El estado origen '{desde}' no existe")
+            if not self.automata_actual.obtener_estado(hacia):
+                raise ValueError(f"El estado destino '{hacia}' no existe")
 
-        if simbolo not in ('ε', 'epsilon', ''):
-            if len(simbolo) > 1:
-                raise ValueError("El símbolo debe ser un único carácter")
-            if self.automata_actual.alfabeto and simbolo not in self.automata_actual.alfabeto:
-                raise ValueError(f"El símbolo '{simbolo}' no pertenece al alfabeto")
+            if simbolo not in ('ε', 'epsilon', ''):
+                if len(simbolo) > 1:
+                    raise ValueError("El símbolo debe ser un único carácter")
+                if self.automata_actual.alfabeto and simbolo not in self.automata_actual.alfabeto:
+                    raise ValueError(f"El símbolo '{simbolo}' no pertenece al alfabeto")
 
-        self.automata_actual.agregar_transicion(desde, simbolo, hacia)
+            self.automata_actual.agregar_transicion(desde, simbolo, hacia)
 
-        self.entry_desde.delete(0, 'end')
-        self.entry_simbolo.delete(0, 'end')
-        self.entry_hacia.delete(0, 'end')
+            self.entry_desde.delete(0, 'end')
+            self.entry_simbolo.delete(0, 'end')
+            self.entry_hacia.delete(0, 'end')
 
-        self._refrescar_lista()
-        self.log(f"✓ Transición: {desde} --{simbolo}--> {hacia}")
-    except ValueError as e:
-        messagebox.showerror("Transición inválida", str(e))
+            self._refrescar_lista()
+            self.log(f"✓ Transición: {desde} --{simbolo}--> {hacia}")
+        except ValueError as e:
+            messagebox.showerror("Transición inválida", str(e))
 
     def _refrescar_lista(self):
         for item in self.tree_estados.get_children():
@@ -349,95 +342,94 @@ class AplicacionAutomatas:
                    command=self._mostrar_actual).pack(pady=5)
 
     def _convertir_afn_afd(self):
-           try:
-               if not self.automata_actual.estados:         
+        try:
+            if not self.automata_actual.estados:
                 messagebox.showwarning("Aviso", "No hay autómata creado")
-                   return
-                   if not self.automata_actual.es_afn:
-                       mensaje = (f"El autómata '{self.automata_actual.nombre}' ya es un AFD.\n\n"
-                            f"No es necesaria la conversión AFN → AFD.")
-                       messagebox.showinfo("Sin conversión necesaria", mensaje)
-                       self.log("ℹ El autómata ya es AFD. No se requiere conversión.")
-                       return
-                       
-                    self.log("--- Iniciando conversión AFN → AFD ---")
-                   estados_antes = len(self.automata_actual.estados)
-                   
-                   self.automata_actual = self.automata_actual.afn_a_afd()
-                   estados_despues = len(self.automata_actual.estados)          
-                   
-                   self.fue_convertido = True
-                   self._refrescar_lista()          
-                   
-                   self.log(f"✓ Conversión completada")
-                   self.log(f"  Estados antes: {estados_antes}")         
-                   self.log(f"  Estados después: {estados_despues}")          
-                   
-                   messagebox.showinfo("Conversión exitosa",            
-                                       f"✓ AFN convertido a AFD\n\n"
-                                       f"Estados antes: {estados_antes}\n"
-                                       f"Estados después: {estados_despues}")
-           except Exception as e:
-               messagebox.showerror("Error en conversión", str(e))
-               self.log(f"✗ Error: {e}") 
+                return
+
+            if not self.automata_actual.es_afn:
+                mensaje = (f"El autómata '{self.automata_actual.nombre}' ya es un AFD.\n\n"
+                           f"No es necesaria la conversión AFN → AFD.")
+                messagebox.showinfo("Sin conversión necesaria", mensaje)
+                self.log("ℹ El autómata ya es AFD. No se requiere conversión.")
+                return
+
+            self.log("--- Iniciando conversión AFN → AFD ---")
+            estados_antes = len(self.automata_actual.estados)
+
+            self.automata_actual = self.automata_actual.afn_a_afd()
+            estados_despues = len(self.automata_actual.estados)
+
+            self.fue_convertido = True
+            self._refrescar_lista()
+
+            self.log(f"✓ Conversión completada")
+            self.log(f"  Estados antes: {estados_antes}")
+            self.log(f"  Estados después: {estados_despues}")
+
+            messagebox.showinfo("Conversión exitosa",
+                                f"✓ AFN convertido a AFD\n\n"
+                                f"Estados antes: {estados_antes}\n"
+                                f"Estados después: {estados_despues}")
+        except Exception as e:
+            messagebox.showerror("Error en conversión", str(e))
+            self.log(f"✗ Error: {e}")
 
     def _minimizar(self):
-        
-def _minimizar(self): 
-    try: 
-        if not self.automata_actual.estados: 
-            messagebox.showwarning("Aviso", "No hay autómata creado") 
-            return 
- 
-        if self.automata_actual.es_afn: 
-            mensaje = (f"El autómata '{self.automata_actual.nombre}' es un AFN.\n\n" 
-                       f"Primero debe convertirlo a AFD antes de minimizar.") 
-            messagebox.showinfo("No se puede minimizar", mensaje) 
-            self.log("ℹ No se puede minimizar un AFN. Conviértalo primero a AFD.") 
-            return 
- 
-        estados_antes = len(self.automata_actual.estados) 
- 
-        if estados_antes <= 1: 
-            messagebox.showinfo("No se puede minimizar", 
-                "El autómata tiene 1 o menos estados.\nNo hay nada que minimizar.") 
-            self.log("ℹ Este autómata no se puede minimizar (≤1 estado)") 
-            return 
- 
-        self.log("--- Iniciando minimización ---") 
-        self.log(f"Estados originales: {estados_antes}") 
- 
-        automata_min = self.automata_actual.minimizar() 
-        estados_despues = len(automata_min.estados) 
- 
-        if estados_despues == estados_antes: 
-            self.log("ℹ El autómata ya estaba en su forma mínima") 
-            messagebox.showinfo("Autómata ya mínimo", 
-                f"El autómata ya estaba en su forma mínima.\n\n" 
-                f"Estados: {estados_antes} → {estados_despues}\n" 
-                f"Al aplicar la minimización vuelve a quedar con los mismos estados.") 
-            self.fue_minimizado = True 
-            return 
- 
-        self.automata_actual = automata_min 
-        self.fue_minimizado = True 
-        self._refrescar_lista() 
- 
-        self.log(f"✓ Minimización completada") 
-        self.log(f"  Estados antes: {estados_antes}") 
-        self.log(f"  Estados después: {estados_despues}") 
-        self.log(f"  Reducción: {estados_antes - estados_despues} estado(s)") 
- 
-        messagebox.showinfo("Minimización exitosa", 
-            f"✓ AFD minimizado\n\n" 
-            f"Estados antes: {estados_antes}\n" 
-            f"Estados después: {estados_despues}\n" 
-            f"Reducción: {estados_antes - estados_despues} estado(s)") 
-    except Exception as e: 
-        messagebox.showerror("Error en minimización", str(e)) 
-        self.log(f"✗ Error: {e}")
-        
-        def _mostrar_actual(self):
+        try:
+            if not self.automata_actual.estados:
+                messagebox.showwarning("Aviso", "No hay autómata creado")
+                return
+
+            if self.automata_actual.es_afn:
+                mensaje = (f"El autómata '{self.automata_actual.nombre}' es un AFN.\n\n"
+                           f"Primero debe convertirlo a AFD antes de minimizar.")
+                messagebox.showinfo("No se puede minimizar", mensaje)
+                self.log("ℹ No se puede minimizar un AFN. Conviértalo primero a AFD.")
+                return
+
+            estados_antes = len(self.automata_actual.estados)
+
+            if estados_antes <= 1:
+                messagebox.showinfo("No se puede minimizar",
+                                    "El autómata tiene 1 o menos estados.\nNo hay nada que minimizar.")
+                self.log("ℹ Este autómata no se puede minimizar (≤1 estado)")
+                return
+
+            self.log("--- Iniciando minimización ---")
+            self.log(f"Estados originales: {estados_antes}")
+
+            automata_min = self.automata_actual.minimizar()
+            estados_despues = len(automata_min.estados)
+
+            if estados_despues == estados_antes:
+                self.log("ℹ El autómata ya estaba en su forma mínima")
+                messagebox.showinfo("Autómata ya mínimo",
+                                    f"El autómata ya estaba en su forma mínima.\n\n"
+                                    f"Estados: {estados_antes} → {estados_despues}\n"
+                                    f"Al aplicar la minimización vuelve a quedar con los mismos estados.")
+                self.fue_minimizado = True
+                return
+
+            self.automata_actual = automata_min
+            self.fue_minimizado = True
+            self._refrescar_lista()
+
+            self.log(f"✓ Minimización completada")
+            self.log(f"  Estados antes: {estados_antes}")
+            self.log(f"  Estados después: {estados_despues}")
+            self.log(f"  Reducción: {estados_antes - estados_despues} estado(s)")
+
+            messagebox.showinfo("Minimización exitosa",
+                                f"✓ AFD minimizado\n\n"
+                                f"Estados antes: {estados_antes}\n"
+                                f"Estados después: {estados_despues}\n"
+                                f"Reducción: {estados_antes - estados_despues} estado(s)")
+        except Exception as e:
+            messagebox.showerror("Error en minimización", str(e))
+            self.log(f"✗ Error: {e}")
+
+    def _mostrar_actual(self):
         a = self.automata_actual
 
         if not a.estados:
@@ -481,17 +473,14 @@ def _minimizar(self):
             f"Alfabeto: {{{alfabeto}}}\n"
             f"Estados: {len(a.estados)}\n"
             f"Inicial: {inicial}\n"
-            f"Finales: {{{finales}}}\n"
-            f"Convertido: {'Sí' if getattr(self, 'fue_convertido', False) else 'No'}\n"
-            f"Minimizado: {'Sí' if getattr(self, 'fue_minimizado', False) else 'No'}"
+            f"Finales: {{{finales}}}"
         )
         messagebox.showinfo("Estado Actual del Autómata", resumen)
-    
+
     # ==================== PESTAÑA: REGEX ====================
     def _construir_tab_regex(self):
         frame = self.tab_regex
 
-        # --- Patrón ---
         p_frame = ttk.LabelFrame(frame, text="Expresión Regular", padding=10)
         p_frame.pack(fill='x', padx=10, pady=5)
 
@@ -503,7 +492,6 @@ def _minimizar(self):
         ttk.Button(p_frame, text="Aplicar", command=self._aplicar_patron).pack(side='left', padx=5)
         ttk.Button(p_frame, text="Generar AFN", command=self._generar_nfa).pack(side='left', padx=5)
 
-        # --- Validar cadena ---
         v_frame = ttk.LabelFrame(frame, text="Validar Cadena", padding=10)
         v_frame.pack(fill='x', padx=10, pady=5)
 
@@ -511,7 +499,6 @@ def _minimizar(self):
         self.entry_validar = ttk.Entry(v_frame, width=30, font=('Arial', 12))
         self.entry_validar.pack(side='left', padx=5)
 
-        # NUEVO: Casilla para coincidencia total
         self.var_coincidencia_total = tk.BooleanVar(value=True)
         ttk.Checkbutton(
             v_frame,
@@ -521,7 +508,6 @@ def _minimizar(self):
 
         ttk.Button(v_frame, text="Validar", command=self._validar_cadena).pack(side='left', padx=5)
 
-        # --- Información de ayuda ---
         ayuda = ttk.LabelFrame(frame, text="Ayuda - Símbolos especiales", padding=10)
         ayuda.pack(fill='x', padx=10, pady=5)
 
@@ -533,7 +519,6 @@ def _minimizar(self):
         ttk.Label(ayuda, text=texto_ayuda, font=('Consolas', 9),
                   justify='left').pack()
 
-        # --- Resultado ---
         self.label_resultado_regex = ttk.Label(frame, text="",
                                                font=('Arial', 16, 'bold'))
         self.label_resultado_regex.pack(pady=20)
