@@ -72,3 +72,10 @@ def dibujar_automata(automata, frame_contenedor):
             pos = {list(G.nodes())[0]: (0, 0)}
         else:
             pos = nx.spring_layout(G, seed=42, k=2.0, iterations=100)
+            
+        # Dibujar nodos
+        nx.draw_networkx_nodes(G, pos, ax=ax, node_color=colores,
+                               node_size=2500, edgecolors='#333333', linewidths=2)
+
+        # Dibujar textos de los nodos (más grandes)
+        nx.draw_networkx_labels(G, pos, ax=ax, font_size=11, font_weight='bold', font_color='#000000')
