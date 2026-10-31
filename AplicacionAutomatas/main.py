@@ -20,16 +20,19 @@ class AplicacionAutomatas:
         self.cuaderno.pack(fill='both', expand=True, padx=5, pady=5)
 
         self.tab_crear = ttk.Frame(self.cuaderno)
+        self.tab_visualizar = ttk.frame(self.cuaderno)
         self.tab_simular = ttk.Frame(self.cuaderno)
         self.tab_conversion = ttk.Frame(self.cuaderno)
         self.tab_regex = ttk.Frame(self.cuaderno)
 
         self.cuaderno.add(self.tab_crear, text='Crear Autómata')
+        self.cuaderno.cuaderno.add(self.tab_vizualizar, text = 'vizualizar')
         self.cuaderno.add(self.tab_simular, text='Simular')
         self.cuaderno.add(self.tab_conversion, text='Conversión')
         self.cuaderno.add(self.tab_regex, text='Regex')
 
         self._construir_tab_crear()
+        self._construir_tab_visualizar()
         self._construir_tab_simular()
         self._construir_tab_conversion()
         self._construir_tab_regex()
@@ -265,6 +268,62 @@ class AplicacionAutomatas:
                 ", ".join(partes) if partes else "(sin transiciones)"
             ))
 
+    # ==================== PESTAÑA: VISUALIZAR ====================
+
+    def _construir_tab_visualizar(self):
+        frame = self.tab_visualizar
+
+        botones = ttk.Frame(frame)
+        botones.pack(fill='x', padx=10, pady=5)
+
+        ttk.Button(botones, text="🔄 Actualizar Vista",
+                   command=self._actualizar_visualizacion).pack(side='left', padx=5)
+
+        # Texto de estado
+        self.label_info_grafo = ttk.Label(
+            botones,
+            text="Crea un autómata y pulsa 'Actualizar Vista'",
+            foreground='gray'
+        )
+        self.label_info_grafo.pack(side='left', padx=20)
+
+        # Lienzo donde se dibuja
+        self.frame_grafo = ttk.Frame(frame, relief='sunken', borderwidth=2)
+        self.frame_grafo.pack(fill='both', expand=True, padx=10, pady=10)
+
+    def _actualizar_visualizacion(self):
+        # Verificar que el frame exista (por si acaso)
+        if not hasattr(self, 'frame_grafo'):
+            messagebox.showerror("Error", "El lienzo gráfico no se ha inicializado.")
+            return
+
+        # Verificar que haya autómata
+        if not self.automata_actual.estados:
+            self.label_info_grafo.config(
+                text="No hay autómata para visualizar. Crea uno primero.",
+                foreground='red'
+            )
+            return
+
+        # Intentar dibujar
+        try:
+            from utilidades.visualizador import dibujar_automata
+            dibujar_automata(self.automata_actual, self.frame_grafo)
+
+            self.label_info_grafo.config(
+                text=f"{self.automata_actual.nombre} "
+                     f"({'AFN' if self.automata_actual.es_afn else 'AFD'}) - "
+                     f"{len(self.automata_actual.estados)} estados",
+                foreground='blue'
+            )
+            self.log("✓ Vista del autómata actualizada")
+        except Exception as e:
+            self.label_info_grafo.config(
+                text=f"Error al dibujar: {str(e)}",
+                foreground='red'
+            )
+            self.log(f"✗ Error gráfico: {e}")
+            
     # ==================== PESTAÑA: SIMULAR ====================
     def _construir_tab_simular(self):
         frame = self.tab_simular
