@@ -123,4 +123,25 @@ def dibujar_automata(automata, frame_contenedor):
                         arrowprops=dict(arrowstyle='->', color='blue', lw=2.5))
             ax.text(x0 - 0.6, y0 + 0.05, 'inicio',
                     fontsize=9, color='blue', fontweight='bold')
+
+        # Título
+        ax.set_title(f"{automata.nombre} ({'AFN' if automata.es_afn else 'AFD'})",
+                     fontsize=14, fontweight='bold', pad=15)
+        ax.axis('off')
+        plt.tight_layout()
+
+        # Embeber en Tkinter
+        canvas = FigureCanvasTkAgg(fig, master=frame_contenedor)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill='both', expand=True)
+        plt.close(fig)
+
+    except Exception as e:
+        # Mostrar error en el frame si algo falla
+        for widget in frame_contenedor.winfo_children():
+            widget.destroy()
+        from tkinter import Label
+        lbl = Label(frame_contenedor, text=f"Error al dibujar:\n{e}",
+                    fg='red', bg='white', wraplength=400)
+        lbl.pack(expand=True)
     
