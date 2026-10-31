@@ -26,7 +26,7 @@ class AplicacionAutomatas:
         self.tab_regex = ttk.Frame(self.cuaderno)
 
         self.cuaderno.add(self.tab_crear, text='Crear Autómata')
-        self.cuaderno.cuaderno.add(self.tab_vizualizar, text = 'vizualizar')
+        self.cuaderno.add(self.tab_vizualizar, text = 'vizualizar')
         self.cuaderno.add(self.tab_simular, text='Simular')
         self.cuaderno.add(self.tab_conversion, text='Conversión')
         self.cuaderno.add(self.tab_regex, text='Regex')
