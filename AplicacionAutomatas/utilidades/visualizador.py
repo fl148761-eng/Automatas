@@ -91,4 +91,15 @@ def dibujar_automata(automata, frame_contenedor):
                 aristas_curvas.append((u, v))
             else:
                 aristas_rectas.append((u, v))
+                
+        # Dibujar aristas más gruesas y oscuras
+        if aristas_rectas:
+            nx.draw_networkx_edges(G, pos, edgelist=aristas_rectas, ax=ax,
+                                   arrows=True, arrowsize=25, edge_color='#555555',
+                                   width=2.0, node_size=2500)
+
+        if aristas_curvas:
+            nx.draw_networkx_edges(G, pos, edgelist=aristas_curvas, ax=ax,
+                                   arrows=True, arrowsize=25, edge_color='#555555',
+                                   width=2.0, connectionstyle='arc3,rad=0.2', node_size=2500)
     
