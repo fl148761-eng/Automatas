@@ -102,4 +102,25 @@ def dibujar_automata(automata, frame_contenedor):
             nx.draw_networkx_edges(G, pos, edgelist=aristas_curvas, ax=ax,
                                    arrows=True, arrowsize=25, edge_color='#555555',
                                    width=2.0, connectionstyle='arc3,rad=0.2', node_size=2500)
+
+        # Auto-loops
+        for u, v in auto_loops:
+            x, y = pos[u]
+            ax.annotate('', xy=(x + 0.1, y + 0.15), xytext=(x - 0.1, y + 0.15),
+                        arrowprops=dict(arrowstyle='->', color='#555555',
+                                        lw=2.0, connectionstyle='arc3,rad=1.5'))
+
+        # Etiquetas de aristas (con fondo blanco para que se lean bien)
+        nx.draw_networkx_edge_labels(G, pos, edge_labels=etiquetas, ax=ax,
+                                     font_size=10, font_color='#cc0000',
+                                     bbox=dict(boxstyle='round,pad=0.3',
+                                               fc='white', ec='#cccccc', alpha=0.9))
+
+        # Flecha del estado inicial
+        if automata.estado_inicial:
+            x0, y0 = pos[automata.estado_inicial.id]
+            ax.annotate('', xy=(x0 - 0.15, y0), xytext=(x0 - 0.5, y0),
+                        arrowprops=dict(arrowstyle='->', color='blue', lw=2.5))
+            ax.text(x0 - 0.6, y0 + 0.05, 'inicio',
+                    fontsize=9, color='blue', fontweight='bold')
     
