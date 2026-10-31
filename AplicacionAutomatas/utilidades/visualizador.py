@@ -79,3 +79,16 @@ def dibujar_automata(automata, frame_contenedor):
 
         # Dibujar textos de los nodos (más grandes)
         nx.draw_networkx_labels(G, pos, ax=ax, font_size=11, font_weight='bold', font_color='#000000')
+
+        # Separar aristas (rectas, curvas y auto-loops)
+        aristas_rectas = []
+        aristas_curvas = []
+        auto_loops = []
+        for u, v in G.edges():
+            if u == v:
+                auto_loops.append((u, v))
+            elif G.has_edge(v, u):
+                aristas_curvas.append((u, v))
+            else:
+                aristas_rectas.append((u, v))
+    
